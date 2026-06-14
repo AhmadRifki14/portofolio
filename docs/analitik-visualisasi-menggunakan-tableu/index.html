@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analitik Visualisasi Menggunakan Tableu - Asuhan Siber</title>
+    <link rel="icon" type="image/png" href="../../images/logo.png">    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <style>
+        /* Gaya tambahan khusus halaman detail artikel */
+        :root{--bg-main: #0b0f19;--bg-card: #111827;--bg-nav: #030712;--border-color: #1f2937;--text-main: #f3f4f6;--text-muted: #9ca3af;--accent-green: #34d399;--accent-blue: #60a5fa}body{background-color:var(--bg-main);color:var(--text-main);font-family:ui-sans-serif,system-ui,sans-serif;margin:0;padding:0;min-height:100vh}.nav-logo{height:32px;width:auto;object-fit:contain;display:block}.navbar{background-color:var(--bg-nav);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:50}.nav-container{max-w:1152px;margin:0 auto;padding:16px;display:flex;justify-content:space-between;align-items:center}.logo-flex{display:flex;align-items:center;gap:12px}.logo-text{font-family:monospace;font-size:20px;font-weight:700;color:var(--accent-green);letter-spacing:1px}.nav-links{display:flex;gap:24px}.nav-link{color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:500;font-family:monospace;transition:color .2s;padding-bottom:4px}.nav-link:hover{color:var(--text-main)}.nav-link.active{color:var(--accent-green);border-bottom:2px solid var(--accent-green)}.hero{max-width:1152px;margin:0 auto;padding:48px 16px;text-align:center}.hero h1{font-size:40px;margin:0;font-weight:800;background:linear-gradient(to right,var(--accent-green),var(--accent-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hero p{color:var(--text-muted);max-width:640px;margin:16px auto 0;font-size:18px}.content-wrapper{max-width:1152px;margin:0 auto;padding:0 16px 96px}.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;border-bottom:1px solid var(--border-color);padding-bottom:16px}.section-header h2{font-family:monospace;font-size:24px;margin:0}.badge-count{background-color:var(--border-color);color:var(--text-muted);font-size:12px;padding:4px 12px;border-radius:9999px}.grid-layout{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}.card{background-color:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;transition:border-color .3s}.card:hover{border-color:#34d39980}.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.category-badge{font-family:monospace;font-size:12px;padding:4px 10px;border-radius:4px;background-color:#34d3991a;color:var(--accent-green);border:1px solid rgba(52,211,153,.2)}.card-date{font-size:12px;color:var(--text-muted);font-family:monospace}.card h3{margin:0 0 12px;font-size:20px}.card h3 a{color:var(--text-main);text-decoration:none;transition:color .2s}.card h3 a:hover{color:var(--accent-green)}.card p{color:var(--text-muted);font-size:14px;line-height:1.6;margin:0}.card-footer{margin-top:24px;padding-top:16px;border-top:1px solid #111827;text-align:right}.read-more{font-family:monospace;font-size:14px;color:var(--accent-blue);text-decoration:none}.read-more:hover{color:#93c5fd}.empty-state{text-align:center;padding:64px 0;background-color:var(--bg-nav);border-radius:12px;border:1px solid var(--border-color)}.empty-icon{font-size:48px;margin-bottom:16px}.empty-text{font-family:monospace;color:var(--text-muted);margin:0}.main-footer{border-top:1px solid var(--border-color);background-color:var(--bg-nav);padding:24px 0;text-align:center;font-size:12px;color:#4b5563;font-family:monospace}
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 26px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            z-index: 100;
+        }
+
+        .menu-toggle span {
+            width: 100%;
+            height: 2px;
+            background-color: var(--text-main);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Breakpoint Media Query: Di bawah resolusi 768px (Mode HP) */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex; /* Memunculkan tombol strip 3 */
+            }
+
+            /* 🔒 FIX: Paksa menu hilang total saat halaman pertama kali dibuka di HP */
+            .nav-links {
+                display: none !important; 
+                flex-direction: column;
+                position: absolute;
+                top: 69px; /* Pas dengan tinggi batas navbar kamu */
+                left: 0;
+                width: 100%;
+                background-color: rgba(3, 7, 18, 0.98); /* Dibuat sedikit lebih pekat agar teks di bawahnya tidak tembus mengganggu */
+                border-bottom: 1px solid var(--border-color);
+                padding: 20px;
+                box-sizing: border-box;
+                gap: 20px;
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.7);
+                z-index: 99; /* Supaya berada di atas konten banner utama */
+            }
+
+            /* 🔒 FIX: Paksa menu muncul HANYA ketika tombol strip 3 diklik (mendapat class active) */
+            .nav-links.active {
+                display: flex !important;
+            }
+
+            .nav-link {
+                font-size: 16px;
+                padding: 8px 0;
+                width: 100%;
+                border-bottom: 1px solid rgba(31, 41, 55, 0.4);
+            }
+
+            .nav-link.active {
+                border-bottom: 1px solid var(--accent-green);
+            }
+            
+            /* Animasi Transformasi Hamburger Menu */
+            .menu-toggle.active span:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+                background-color: var(--accent-green);
+            }
+            .menu-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+            .menu-toggle.active span:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+                background-color: var(--accent-green);
+            }
+        }
+
+
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: var(--accent-green);
+            text-decoration: none;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .btn-back:hover {
+            text-decoration: underline;
+        }
+        .meta-info {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-family: monospace;
+            margin-bottom: 16px;
+        }
+        .article-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+        .article-body {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            line-height: 1.8;
+            color: #e5e7eb;
+            font-size: 16px;
+        }
+        
+        /* 🔒 FIX LAYOUT: Mengizinkan gambar melar responsif & tidak keluar batas panel */
+        .article-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #30363d;
+        }
+        .article-body p {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-flex">
+                <img src="../../images/logo.png" alt="Logo Asuhan Siber" class="nav-logo">
+                <span class="logo-text">ASUHAN_SIBER  // DETAILED_WRITEUP</span>
+            </div>
+            
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-links" id="navLinks">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/docs" class="nav-link active">Documentation</a>
+                <a href="/about" class="nav-link">About Me</a>
+            </div>  
+        </div>
+    </nav>
+
+    <main class="content-wrapper" style="padding-top: 40px; padding-bottom: 60px;">
+        
+        <a href="/docs" class="btn-back">&larr; Back to Documentation</a>
+
+        <article>
+            <div class="meta-info">
+                <span class="category-badge">Web Development</span>
+                <span>•</span>
+                <span>Published: 2026-06-13</span>
+            </div>
+
+            <h1 class="article-title">Analitik Visualisasi Menggunakan Tableu</h1>
+
+            <div class="article-body">
+                <div class='tableauPlaceholder' id='viz1781330274401' style='position: relative'><noscript><a href='#'><img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;An&#47;AnalitikVisualisasiDataPramuka&#47;Dashboard1&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='AnalitikVisualisasiDataPramuka&#47;Dashboard1' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;An&#47;AnalitikVisualisasiDataPramuka&#47;Dashboard1&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-US' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1781330274401');                    var vizElement = divElement.getElementsByTagName('object')[0];                    if ( divElement.offsetWidth > 800 ) { vizElement.style.minWidth='420px';vizElement.style.maxWidth='1750px';vizElement.style.width='100%';vizElement.style.minHeight='587px';vizElement.style.maxHeight='1087px';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else if ( divElement.offsetWidth > 500 ) { vizElement.style.minWidth='420px';vizElement.style.maxWidth='1750px';vizElement.style.width='100%';vizElement.style.minHeight='587px';vizElement.style.maxHeight='1087px';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else { vizElement.style.width='100%';vizElement.style.height='1377px';}                     var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
+            <br>
+                <p><strong>{Pendahuluan}</strong></p>
+<p>Pemetaan data yang akurat mengenai sebaran dan kuantitas anggota merupakan langkah strategis dalam mengoptimalkan pengelolaan serta pengembangan Gerakan Pramuka di Indonesia. Praktik ini bertujuan untuk membangun <strong data-path-to-node="1" data-index-in-node="225">Dashboard Visualisasi Data Pemetaan Gerakan Pramuka Indonesia Tahun 2020</strong> dengan memanfaatkan Microsoft Excel sebagai media pengolahan <em data-path-to-node="1" data-index-in-node="348">dataset</em> awal, yang kemudian diintegrasikan ke dalam <em data-path-to-node="1" data-index-in-node="400">software</em> Tableau. Melalui kombinasi kedua perangkat ini, data kepramukaan yang kompleks dapat ditransformasikan menjadi visualisasi pemetaan yang interaktif dan dinamis, sehingga mampu menghasilkan wawasan (<em data-path-to-node="1" data-index-in-node="607">insight</em>) geografis yang akurat untuk mendukung pengambilan keputusan serta penyusunan program kerja yang lebih efektif.</p>
+<p>&nbsp;</p>
+<p><strong>{Kebutuhan Sistem}</strong></p>
+<ol>
+<li>Data Excell</li>
+<li>Software Tableu</li>
+</ol>
+<p>&nbsp;</p>
+<p><strong>{Implementasi}</strong></p>
+<p>Siapkan data yang sudah di cleaning dan siap dipakai pada tableu.&nbsp; Disini saya menyiapkan 3 sheet data, yang nantinya akan menampilkan Pemetaan Gerakan Pramuka di Indonesia. Contohnya seperti : jumlah Kwartir Daerah, jumlah Kwartir Cabang, jumlah Kwartir Ranting, jumlah Gugus Depan, hingga jumlah keanggotaan Pramuka. Dimulai dari jumlah siaga, penggalang, penegak, pandega dan pembina. Juga nantinya akan menampilkan jumlah keseluruhan anggota pramuka yg ditandai dengan warna yang mengartikan range jumlah anggota.</p>
+<p><img src="../../../images/1781404278_mceclip0.png"></p>
+<p><img src="../../../images/1781404301_mceclip1.png"></p>
+<p><img src="../../../images/1781404317_mceclip2.png"></p>
+<p>&nbsp;</p>
+<p>Setelah data siap, buka software tableu, lalu Connect to Data, pilih Microsoft Excell dan pilih excell yang sebelumnya sudah dibuat</p>
+<p><img src="../../../images/1781404807_mceclip3.png" width="741" height="432"></p>
+<p>&nbsp;</p>
+<p>Untuk membantu membersihkan data dan merapikan struktur data secara otomatis, klik checkbox berikut.</p>
+<p><img src="../../../images/1781404982_mceclip4.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Darg &amp; Drop Kwarda ke Tengah lalu Field Nama Kwarda ganti tipe data menjadi State/Province. Dan pastikan tipe data pada field lain sudah sesuai</p>
+<p><img src="../../../images/1781405228_mceclip5.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Drag &amp; drop Anggota Dewasa dan Anggota Muda, lalu hubungkan dengan Kwarda. Untuk menyamakan query, Pada sheet Kwarda, pilih field Kwarda, dan pada sheet Anggota Dewasa pilih field (Kwarda). Lalu sama kan tipe data pada field Kwarda menjadi State/Province. Lakukan hal yang sama pada sheet Anggota Muda</p>
+<p><img src="../../../images/1781405503_mceclip6.png" width="741"></p>
+<p><img src="../../../images/1781405628_mceclip7.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Pilih Sheet 1, lalu drag &amp; drop field Kwarda pada Tables Kwarda. Nanti akan tampil Peta Indonesia. Namun penyebaran data masih belum sesuai</p>
+<p><img src="../../../images/1781406046_mceclip8.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Klik kanan pada peta lalu lakukan Edit Location. Karena pada tabel menggunakan singkatan, sistem tableu tidak mengenali provinsi tersebut, maka perlu menyamakan satu per satu. Jika sudah sama semua, pilih ok.</p>
+<p><img src="../../../images/1781406175_mceclip9.png" width="548" height="482"></p>
+<p>&nbsp;</p>
+<p>Pilih grafik berikut ini agar nantinya penyebaran anggota pramuka dapat dilihat dari warna.</p>
+<p><img src="../../../images/1781406404_mceclip10.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Lakukan drag &amp; drop pada beberapa fieldberikut</p>
+<p><img src="../../../images/1781406720_mceclip12.png" width="741"></p>
+<p><img src="../../../images/1781406661_mceclip11.png" width="741"></p>
+<p><strong><img src="../../../images/1781406800_mceclip13.png" width="741"></strong></p>
+<p>&nbsp;</p>
+<p>Klik kanan pada layar sebelah kiri, lalu pilih create calculation, disini nantinya akan menampilkan legend dan perbedaan warna pada setiap jumlah di masing masing provinsi</p>
+<p><img src="../../../images/1781406954_mceclip14.png" width="741"></p>
+<p>&nbsp;</p>
+<p>berikan nama total, lalu isikan data berikut, kemudian apply dan ok</p>
+<p>SUM([Kwarcab])+SUM([Pandega])+SUM([Penegak])+</p>
+<p>SUM([Penggalang])+SUM([Siaga])+SUM([Pembina])</p>
+<p><strong><img src="../../../images/1781407130_mceclip15.png"></strong></p>
+<p>&nbsp;</p>
+<p>Buat Kembali calculation, lalu isikan data berikut,</p>
+<p>IF [total]= 0 THEN "Belum ada data"<br>ELSEIF [total]&gt;= 1000000 THEN "&gt;1.000.000"<br>ELSEIF [total]&gt;= 500000 THEN "500.000 - 1.000.000"<br>ELSEIF [total]&gt;= 100000 THEN "100.000 - 500.000"<br>ELSEIF [total]&gt;= 50000 THEN "50.000 - 100.000"<br>ELSE"0-50.000"<br>END</p>
+<p><img src="../../../images/1781407377_mceclip16.png"></p>
+<p>&nbsp;</p>
+<p>Drag &amp; Drop pada calculation range yang telah dibuat ke color, lalu fokus pada pojok kanan atas bahwa tooltip sudah muncul, namun kita buat agar yang paling atas yang paling tinggi.</p>
+<p><img src="../../../images/1781407657_mceclip17.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Lalu klik tombol yang mengarah ke bawah, pilih sort, lalu buat agar urutannya dari yang tertinggi terlebih dahulu.</p>
+<p><img src="../../../images/1781407797_mceclip20.png">&nbsp; &nbsp; <img src="../../../images/1781407785_mceclip18.png" width="207" height="278"></p>
+<p>&nbsp;</p>
+<p>Kita dapat menyesuaikan warna dari tooltip, pilih color, lalu edit warna, jika sudah klik ok.</p>
+<p><img src="../../../images/1781407958_mceclip21.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Disini kita dapat menyesuaikan tooltip, dengan cara klik tooltip lalu sesuaikan.</p>
+<p><img src="../../../images/1781408141_mceclip22.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Jadi ketika kursor diarahkan ke provinsi akan menampilkan data berikut</p>
+<p><img src="../../../images/1781408228_mceclip23.png" width="548" height="306"></p>
+<p>&nbsp;</p>
+<p>Agar peta hanya menampilkan Indonesia saja, klik kanan pada peta lalu pilih Background Layers, hilangkan semua ceklis pada Backgroun Map Layers</p>
+<p><img src="../../../images/1781408433_mceclip24.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Disini kita buat sheet baru, untuk menampilkan jumlah Data Kwarda, yang nantinya akan ditampilkan di dashboard</p>
+<p><img src="../../../images/1781408741_mceclip25.png" width="408" height="477">&nbsp; &nbsp;<img src="../../../images/1781408853_mceclip26.png" width="617" height="330"></p>
+<p>&nbsp;</p>
+<p>Buat sheet baru untuk kwarcab, lalu drag &amp; drop dan sesuaikan ukuran teks</p>
+<p><img src="../../../images/1781409024_mceclip27.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Lakukan hal yang sama untuk Data Kwaran</p>
+<p><img src="../../../images/1781410230_mceclip28.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Lakukan hal yang sama untuk gugus depan</p>
+<p><img src="../../../images/1781410490_mceclip30.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Buat Dashboard baru, dan berikan nama sheet agar memudahkan saat menarik data</p>
+<p><img src="../../../images/1781410622_mceclip31.png" width="451" height="443"></p>
+<p>&nbsp;</p>
+<p>Pada dashboard berikan ukuran berikut</p>
+<p><img src="../../../images/1781410705_mceclip32.png"></p>
+<p>&nbsp;</p>
+<p>Seret Sheet Peta Pramuka ke tengah, lalu untuk legend agar bisa dipindahkan, klik kanan pada legen lalu pilih floating, pindahkan ke sudut kiri bawah</p>
+<p><img src="../../../images/1781410916_mceclip33.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Drag &amp; Drop untuk jumlah masing masing kelompok. Lalu sama seperti sebelumnya perlu klik kanan dan floating agar dapat dipindah pindahkan.</p>
+<p><img src="../../../images/1781411142_mceclip34.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Masukan text untuk memberikan judul pada masing masing kelompok data. Sama seperti sebelumnya perlu klik kanan dan pilih floating agar dapat dipindah pindahkan.</p>
+<p><img src="../../../images/1781411319_mceclip35.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Masukan gambar pada masing masing kelompok data. Sama seperti sebelumnya perlu klik kanan dan pilih floating agar dapat dipindah pindahkan.</p>
+<p><img src="../../../images/1781411396_mceclip36.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Kita dapat memberikan judul agar informasi dari Visualisasi dapat lebih mudah dibaca</p>
+<p><img src="../../../images/1781411543_mceclip37.png" width="741"></p>
+<p>&nbsp;</p>
+<p>Langkah akhir, kita save ke public agar bisa dilihat oleh siapapun, namun jika belum punya akun tableu, harap membuat akun terlebih dahulu</p>
+<p><img src="../../../images/1781411599_mceclip38.png"></p>
+<p>&nbsp;</p>
+<p>Maka data sudah dapat dilihat, dengan cara share link, atau jika punya web hosting sendiri, dapat memilih copy embed code.</p>
+<p><img src="../../../images/1781411716_mceclip39.png" width="741"></p>
+<p>&nbsp;</p>
+<p><strong>{Kesimpulan}</strong></p>
+<p>Berdasarkan hasil praktik yang telah dilakukan, dapat disimpulkan bahwa integrasi antara Microsoft Excel dan Tableau berhasil membangun <strong data-path-to-node="1" data-index-in-node="147">Dashboard Visualisasi Data Pemetaan Gerakan Pramuka Indonesia</strong> secara efektif. Melalui alur kerja ini, data kepramukaan yang kompleks berhasil ditransformasikan menjadi visualisasi pemetaan yang interaktif, dinamis, dan mudah dipahami. Dasbor akhir yang dihasilkan mampu memberikan wawasan (<em data-path-to-node="1" data-index-in-node="437">insight</em>) geografis yang akurat mengenai sebaran serta kuantitas anggota demi mendukung pengambilan keputusan strategis dan penyusunan program kerja ke depan.</p>
+<p>&nbsp;</p>
+<p><strong>// END_OF_DOCUMENTATION</strong></p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer class="main-footer" style="position: fixed; bottom: 0; width: 100%;">
+        &copy; 2026 - Asuhan Siber - Personal Platform.
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            // Pasang/lepas class active pada tombol hamburger
+            this.classList.toggle('active');
+            // Pasang/lepas class active pada container list menu
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

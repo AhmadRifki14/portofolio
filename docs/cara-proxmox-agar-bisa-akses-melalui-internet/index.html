@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cara Proxmox Agar bisa Akses Melalui Internet - Asuhan Siber</title>
+    <link rel="icon" type="image/png" href="../../images/logo.png">    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <style>
+        :root{--bg-main: #0b0f19;--bg-card: #111827;--bg-nav: #030712;--border-color: #1f2937;--text-main: #f3f4f6;--text-muted: #9ca3af;--accent-green: #34d399;--accent-blue: #60a5fa}body{background-color:var(--bg-main);color:var(--text-main);font-family:ui-sans-serif,system-ui,sans-serif;margin:0;padding:0;min-height:100vh}.nav-logo{height:32px;width:auto;object-fit:contain;display:block}.navbar{background-color:var(--bg-nav);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:50}.nav-container{max-w:1152px;margin:0 auto;padding:16px;display:flex;justify-content:space-between;align-items:center}.logo-flex{display:flex;align-items:center;gap:12px}.logo-text{font-family:monospace;font-size:20px;font-weight:700;color:var(--accent-green);letter-spacing:1px}.nav-links{display:flex;gap:24px}.nav-link{color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:500;font-family:monospace;transition:color .2s;padding-bottom:4px}.nav-link:hover{color:var(--text-main)}.nav-link.active{color:var(--accent-green);border-bottom:2px solid var(--accent-green)}.hero{max-width:1152px;margin:0 auto;padding:48px 16px;text-align:center}.hero h1{font-size:40px;margin:0;font-weight:800;background:linear-gradient(to right,var(--accent-green),var(--accent-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hero p{color:var(--text-muted);max-width:640px;margin:16px auto 0;font-size:18px}.content-wrapper{max-width:1152px;margin:0 auto;padding:0 16px 96px}.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;border-bottom:1px solid var(--border-color);padding-bottom:16px}.section-header h2{font-family:monospace;font-size:24px;margin:0}.badge-count{background-color:var(--border-color);color:var(--text-muted);font-size:12px;padding:4px 12px;border-radius:9999px}.grid-layout{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}.card{background-color:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;transition:border-color .3s}.card:hover{border-color:#34d39980}.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.category-badge{font-family:monospace;font-size:12px;padding:4px 10px;border-radius:4px;background-color:#34d3991a;color:var(--accent-green);border:1px solid rgba(52,211,153,.2)}.card-date{font-size:12px;color:var(--text-muted);font-family:monospace}.card h3{margin:0 0 12px;font-size:20px}.card h3 a{color:var(--text-main);text-decoration:none;transition:color .2s}.card h3 a:hover{color:var(--accent-green)}.card p{color:var(--text-muted);font-size:14px;line-height:1.6;margin:0}.card-footer{margin-top:24px;padding-top:16px;border-top:1px solid #111827;text-align:right}.read-more{font-family:monospace;font-size:14px;color:var(--accent-blue);text-decoration:none}.read-more:hover{color:#93c5fd}.empty-state{text-align:center;padding:64px 0;background-color:var(--bg-nav);border-radius:12px;border:1px solid var(--border-color)}.empty-icon{font-size:48px;margin-bottom:16px}.empty-text{font-family:monospace;color:var(--text-muted);margin:0}.main-footer{border-top:1px solid var(--border-color);background-color:var(--bg-nav);padding:24px 0;text-align:center;font-size:12px;color:#4b5563;font-family:monospace}
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 26px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            z-index: 100;
+        }
+
+        .menu-toggle span {
+            width: 100%;
+            height: 2px;
+            background-color: var(--text-main);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Breakpoint Media Query: Di bawah resolusi 768px (Mode HP) */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex; /* Memunculkan tombol strip 3 */
+            }
+
+            /* 🔒 FIX: Paksa menu hilang total saat halaman pertama kali dibuka di HP */
+            .nav-links {
+                display: none !important; 
+                flex-direction: column;
+                position: absolute;
+                top: 69px; /* Pas dengan tinggi batas navbar kamu */
+                left: 0;
+                width: 100%;
+                background-color: rgba(3, 7, 18, 0.98); /* Dibuat sedikit lebih pekat agar teks di bawahnya tidak tembus mengganggu */
+                border-bottom: 1px solid var(--border-color);
+                padding: 20px;
+                box-sizing: border-box;
+                gap: 20px;
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.7);
+                z-index: 99; /* Supaya berada di atas konten banner utama */
+            }
+
+            /* 🔒 FIX: Paksa menu muncul HANYA ketika tombol strip 3 diklik (mendapat class active) */
+            .nav-links.active {
+                display: flex !important;
+            }
+
+            .nav-link {
+                font-size: 16px;
+                padding: 8px 0;
+                width: 100%;
+                border-bottom: 1px solid rgba(31, 41, 55, 0.4);
+            }
+
+            .nav-link.active {
+                border-bottom: 1px solid var(--accent-green);
+            }
+            
+            /* Animasi Transformasi Hamburger Menu */
+            .menu-toggle.active span:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+                background-color: var(--accent-green);
+            }
+            .menu-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+            .menu-toggle.active span:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+                background-color: var(--accent-green);
+            }
+        }
+
+        /* Gaya tambahan khusus halaman detail artikel */
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: var(--accent-green);
+            text-decoration: none;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .btn-back:hover {
+            text-decoration: underline;
+        }
+        .meta-info {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-family: monospace;
+            margin-bottom: 16px;
+        }
+        .article-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+        .article-body {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            line-height: 1.8;
+            color: #e5e7eb;
+            font-size: 16px;
+        }
+        
+        /* 🔒 FIX LAYOUT: Mengizinkan gambar melar responsif & tidak keluar batas panel */
+        .article-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #30363d;
+        }
+        .article-body p {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo-flex">
+                <img src="../../images/logo.png" alt="Logo Asuhan Siber" class="nav-logo">
+                <span class="logo-text">ASUHAN_SIBER  // DETAILED_WRITEUP</span>
+            </div>
+            
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-links" id="navLinks">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/docs" class="nav-link active">Documentation</a>
+                <a href="/about" class="nav-link">About Me</a>
+            </div>  
+        </div>
+    </nav>
+
+    <main class="content-wrapper" style="padding-top: 40px; padding-bottom: 60px;">
+        
+        <a href="/docs" class="btn-back">&larr; Back to Documentation</a>
+
+        <article>
+            <div class="meta-info">
+                <span class="category-badge">Network Infrastructure</span>
+                <span>•</span>
+                <span>Published: 2026-06-01</span>
+            </div>
+
+            <h1 class="article-title">Cara Proxmox Agar bisa Akses Melalui Internet</h1>
+
+            <div class="article-body">
+                <p data-path-to-node="4"><strong data-path-to-node="4" data-index-in-node="0">[ PENDAHULUAN ]</strong></p>
+<p data-path-to-node="4">Memiliki Perangkat Lab sendiri menggunakan <strong>Proxmox </strong>memang memberikan kebebasan penuh, namun kebebasan tersebut seringkali terkurung di dalam jaringan lokal (LAN). Bayangkan ketika sedang berada di luar kantor atau rumah, dan ingin mengecek Lab, untuk melihat konfigurasi yang pernah dibuat. Apakah harus pulang dulu? Tentu tidak.</p>
+<p data-path-to-node="5">Dokumentasi ini akan memberikan tutorial agar node Proxmox dapat diakses secara publik melalui jalur internet dengan aman, efektif, dan tanpa perlu IP Publik Statis yang mahal.</p>
+<p data-path-to-node="5">&nbsp;</p>
+<p data-path-to-node="5"><strong>{ KEBUTUHAN SISTEM }</strong></p>
+<ol>
+<li data-path-to-node="5">Node Proxmox yang berjalan di jaringan lokal</li>
+<li data-path-to-node="5">Koneksi internet yang stabil</li>
+<li data-path-to-node="5">Domain aktif</li>
+<li data-path-to-node="5">Third-party tunneling (Cloudflare)</li>
+</ol>
+<p>&nbsp;</p>
+<p><strong>{ IMPLEMENTASI }</strong></p>
+<p>Buka Link berikut untuk menginstall cloudfared di proxmox, salin script yang ada pada link tersebut.</p>
+<p>https://community-scripts.org/scripts/cloudflared</p>
+<p><img src="../../../images/1780579377_mceclip0.png" width="700" height="272"></p>
+<p>&nbsp;</p>
+<p>Buka Proxmox lalu paste dan installkan, tunggu hingga selesai.</p>
+<p><img src="../../../images/1780581164_mceclip11.png" width="700"></p>
+<p>&nbsp;</p>
+<p>Buka Dash Cloudflare, jika belum punya akun haraf daftar terlebih dahulu. Lalu tambahkan domain yang sudah dimiliki sebelumnya</p>
+<p>https://dash.cloudflare.com/</p>
+<p><img src="../../../images/1780579917_mceclip2.png" width="700"></p>
+<p>&nbsp;</p>
+<p>disini saya memiliki domain dari hostinger</p>
+<p><img src="../../../images/1780580019_mceclip3.png" width="700"></p>
+<p>&nbsp;</p>
+<p>kembali ke dash cloudflare, masuk ke menu tunnel, dan buat tunnel baru</p>
+<p><img src="../../../images/1780580145_mceclip4.png" width="700"></p>
+<p>&nbsp;</p>
+<p>Pilih Debian, dan copy script yang paling bawah.</p>
+<p><img src="../../../images/1780580394_mceclip5.png" width="700"></p>
+<p>&nbsp;</p>
+<p>Setelah proses installasi sebelumnya beres nanti akan muncul cloudflared, buka console dan paste kan script nya</p>
+<p><img src="../../../images/1780580595_mceclip6.png" width="700"></p>
+<p>&nbsp;</p>
+<p>Pastikan sampai konek dengan ciri healthy pada web dash cloudflare</p>
+<p><img src="../../../images/1780580712_mceclip7.png" width="700"></p>
+<p>&nbsp;</p>
+<p>Lalu lakukan edit pada tunnel tersebut, seperti beri nama subdomain, masukan type nya HTTPS dan URL nya merupakan ip private dari proxmox tersebut</p>
+<p><img src="../../../images/1780580853_mceclip8.png" width="700"></p>
+<p>&nbsp;</p>
+<p>gulih kebawah, buka menu TLS dan aktifkan pada No TLS Verify</p>
+<p><img src="../../../images/1780580926_mceclip9.png" width="700"></p>
+<p>&nbsp;</p>
+<p>Langkah terakhir pada Domain buatkan DNS nya mengarah ke cloudflare</p>
+<p><img src="../../../images/1780581053_mceclip10.png" width="700"></p>
+<p>&nbsp;</p>
+<p>Saat ini proxmox sudah bisa diakses oleh publik</p>
+<p><img src="../../../images/1780581230_mceclip12.png" width="700"></p>
+<p>&nbsp;</p>
+<p><strong>[ SECURITY_LOG: CATATAN KEAMANAN ]</strong></p>
+<p>WARNING: Membuka akses ke luar berarti mengundang risiko. Selalu gunakan Two-Factor Authentication (2FA) di dalam Proxmox untuk memastikan hanya pemilik akses yang sah yang bisa masuk ke mainframe.</p>
+<p>&nbsp;</p>
+<p><strong>// END_OF_DOCUMENTATION</strong></p>
+<p>&nbsp;</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer class="main-footer" style="position: fixed; bottom: 0; width: 100%;">
+        &copy; 2026 - Asuhan Siber - Personal Platform.
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            // Pasang/lepas class active pada tombol hamburger
+            this.classList.toggle('active');
+            // Pasang/lepas class active pada container list menu
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
